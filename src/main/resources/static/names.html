@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Names - Name Rotation System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .names-table, .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .names-table th, .names-table td,
+        .users-table th, .users-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .names-table th, .users-table th {
+            background: var(--light-color);
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+        
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-admin { background: #d1ecf1; color: #0c5460; }
+        .badge-user { background: #e2e3e5; color: #383d41; }
+        
+        .btn-sm { padding: 6px 12px; font-size: 0.85em; }
+        
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 2000; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal.show { display: flex; }
+        .modal-content { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 30px; 
+            max-width: 600px; 
+            width: 90%; 
+            box-shadow: var(--shadow-lg); 
+        }
+        
+        .password-toggle { position: relative; }
+        .toggle-password { 
+            position: absolute; 
+            right: 15px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            color: #666; 
+            font-size: 0.9em; 
+            padding: 5px; 
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .existing-names-section {
+            margin: 30px 0;
+            border: 2px dashed #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            background: #fffbf0;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>🎯 Task Rotation System</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="names.html" class="nav-link active">Manage Names</a>
+                <a href="tasks.html" class="nav-link">Tasks</a>
+                <span class="nav-user" id="currentUser">Admin</span>
+                <button onclick="handleLogout()" class="btn btn-outline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h1>👥 Manage Names & Users</h1>
+            <p>Add users with full accounts for task rotation and login</p>
+        </div>
+
+        <!-- Combined User & Name Creation -->
+        <div class="card">
+            <div class="card-header">
+                <h2>👤 Add User with Account</h2>
+            </div>
+            <div class="card-body">
+                <form id="addUserForm" onsubmit="handleAddUser(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName">Full Name *</label>
+                            <input type="text" id="fullName" placeholder="Enter full name for tasks" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" placeholder="For password recovery" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="username">Username *</label>
+                            <input type="text" id="username" placeholder="For login" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userRole">User Role *</label>
+                            <select id="userRole" required>
+                                <option value="USER">User</option>
+                                <option value="ADMIN">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group password-toggle">
+                        <label for="tempPassword">Temporary Password *</label>
+                        <input type="password" id="tempPassword" placeholder="Set temporary password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('tempPassword', this)">👁️</button>
+                    </div>
+
+                    <div id="userError" class="error-message"></div>
+                    <div id="userSuccess" class="success-message"></div>
+
+                    <button type="submit" class="btn btn-success">
+                        <span id="addUserText">➕ Add User & Name</span>
+                        <span id="addUserSpinner" class="spinner" style="display: none;"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Existing Names Without Accounts Section -->
+        <div class="existing-names-section">
+            <div class="card-header">
+                <h2>🔄 Complete Existing Names ( By adding their accounts)</h2>
+            </div>
+            <div class="card-body">
+                <p><strong>Names exist in the system without user accounts.</strong> Create accounts for them to enable login access.</p>
+                <button onclick="showExistingNamesModal()" class="btn btn-warning">
+                    📝 Create Accounts for Existing Names
+                </button>
+            </div>
+        </div>
+
+        <!-- Users List Section -->
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>📋 Users with Accounts</h2>
+                <button onclick="loadUsers()" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+            </div>
+            <div class="card-body">
+                <div id="usersTableContainer">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <p>Loading users...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Names List Card (Read-only for existing names) -->
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>📋 All Names in System</h2>
+                <button onclick="loadNames()" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+            </div>
+            <div class="card-body">
+                <div id="namesTableContainer">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⏳</div>
+                        <p>Loading names...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Name Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Name</h2>
+            </div>
+            <div class="modal-body">
+                <form id="editNameForm" onsubmit="handleUpdateName(event)">
+                    <input type="hidden" id="editNameId">
+                    <div class="form-group">
+                        <label for="editNameInput">Name</label>
+                        <input type="text" id="editNameInput" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" onclick="closeEditModal()" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-success">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Names Modal -->
+    <div id="existingNamesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Create Accounts for Existing Names</h2>
+                <p>Complete account setup for names without user accounts</p>
+            </div>
+            <div class="modal-body">
+                <div id="existingNamesList">
+                    <!-- Will be populated dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeExistingNamesModal()" class="btn btn-secondary">Cancel</button>
+                    <button type="button" onclick="createBulkAccounts()" class="btn btn-success">Create All Accounts</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/names.js"></script>
+    <script>
+        // Password toggle function
+        function togglePassword(inputId, button) {
+            const passwordInput = document.getElementById(inputId);
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        // Handle adding user with full account
+        async function handleAddUser(event) {
+            event.preventDefault();
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const tempPassword = document.getElementById('tempPassword').value;
+            const userRole = document.getElementById('userRole').value;
+
+            // Validation
+            if (!fullName || !email || !username || !tempPassword) {
+                showUserMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (tempPassword.length < 6) {
+                showUserMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('addUserText').style.display = 'none';
+            document.getElementById('addUserSpinner').style.display = 'inline-block';
+
+            try {
+                // This would call your backend API to create both name and user account
+                const response = await fetch('/api/users/create-with-name', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getAuthToken()
+                    },
+                    body: JSON.stringify({
+                        fullName,
+                        email,
+                        username,
+                        password: tempPassword,
+                        role: userRole
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showUserMessage('User account and name created successfully!', 'success');
+                    document.getElementById('addUserForm').reset();
+                    loadUsers(); // Refresh users list
+                    loadNames(); // Refresh names list
+                } else {
+                    showUserMessage(result.message || 'Failed to create user account', 'error');
+                }
+            } catch (error) {
+                console.error('Create user error:', error);
+                showUserMessage('Network error. Please try again.', 'error');
+            } finally {
+                document.getElementById('addUserText').style.display = 'inline';
+                document.getElementById('addUserSpinner').style.display = 'none';
+            }
+        }
+
+        function showUserMessage(message, type) {
+            const errorDiv = document.getElementById('userError');
+            const successDiv = document.getElementById('userSuccess');
+            
+            if (type === 'error') {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                successDiv.style.display = 'none';
+            } else {
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+                
+                // Auto-hide success message after 3 seconds
+                setTimeout(() => {
+                    successDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Load users with accounts
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users', {
+                    headers: {
+                        'Authorization': 'Bearer ' + getAuthToken()
+                    }
+                });
+                const result = await response.json();
+
+                const container = document.getElementById('usersTableContainer');
+                
+                if (result.status === 'success' && result.data.length > 0) {
+                    let html = `
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    result.data.forEach(user => {
+                        html += `
+                            <tr>
+                                <td>${user.fullName || 'N/A'}</td>
+                                <td>${user.username}</td>
+                                <td>${user.email || 'N/A'}</td>
+                                <td>
+                                    <span class="badge ${user.role === 'ADMIN' ? 'badge-admin' : 'badge-user'}">
+                                        ${user.role}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-success">Active</span>
+                                </td>
+                                <td>
+                                    <button onclick="editUser(${user.id})" class="btn btn-sm btn-outline">Edit</button>
+                                    <button onclick="deleteUser(${user.id})" class="btn btn-sm btn-danger">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `</tbody></table>`;
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👥</div>
+                            <p>No users with accounts found</p>
+                            <p class="text-muted">Add your first user above</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Load users error:', error);
+                document.getElementById('usersTableContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>Error loading users</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Existing names modal functions
+        function showExistingNamesModal() {
+            loadExistingNamesWithoutAccounts();
+            document.getElementById('existingNamesModal').classList.add('show');
+        }
+
+        function closeExistingNamesModal() {
+            document.getElementById('existingNamesModal').classList.remove('show');
+        }
+
+        async function loadExistingNamesWithoutAccounts() {
+            try {
+                const response = await fetch('/api/names/without-accounts', {
+                    headers: {
+                        'Authorization': 'Bearer ' + getAuthToken()
+                    }
+                });
+                const result = await response.json();
+
+                const container = document.getElementById('existingNamesList');
+                
+                if (result.status === 'success' && result.data.length > 0) {
+                    let html = '<p>The following names need user accounts:</p><div style="max-height: 300px; overflow-y: auto;">';
+                    
+                    result.data.forEach(name => {
+                        html += `
+                            <div class="form-row" style="align-items: end; margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                <div class="form-group" style="flex: 2;">
+                                    <label>Name</label>
+                                    <input type="text" value="${name.name}" readonly style="background: #e9ecef;">
+                                </div>
+                                <div class="form-group" style="flex: 2;">
+                                    <label>Email *</label>
+                                    <input type="email" id="email_${name.id}" placeholder="Enter email" required>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Username *</label>
+                                    <input type="text" id="username_${name.id}" placeholder="Username" required>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p>All names have user accounts!</p>';
+                }
+            } catch (error) {
+                console.error('Load existing names error:', error);
+                document.getElementById('existingNamesList').innerHTML = '<p>Error loading names</p>';
+            }
+        }
+
+        function createBulkAccounts() {
+            alert('Bulk account creation will be implemented - this will create accounts for all 17 existing names');
+            // Implementation for bulk account creation goes here
+        }
+
+        function getAuthToken() {
+            const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return user.token || '';
+        }
+
+        // Placeholder functions
+        function editUser(userId) {
+            alert('Edit user functionality will be implemented later - User ID: ' + userId);
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                alert('Delete user functionality will be implemented later - User ID: ' + userId);
+            }
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+            loadNames();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Name Rotation System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>🎯 Task Rotation System</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="names.html" class="nav-link">Manage Names</a>
+                <a href="tasks.html" class="nav-link">Tasks</a>
+                <span class="nav-user" id="currentUser">Admin</span>
+                <button onclick="handleLogout()" class="btn btn-outline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h1>📊 Dashboard</h1>
+            <p>Overview of task rotation system</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3 id="totalNames">0</h3>
+                    <p>Total Names</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <h3 id="activeNames">0</h3>
+                    <p>Active Names</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-content">
+                    <h3 id="tasksToday">0</h3>
+                    <p>Tasks Today</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-content">
+                    <h3 id="specialTasks">0</h3>
+                    <p>Special Tasks</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🚀 Quick Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <a href="names.html" class="action-btn">
+                        <span class="action-icon">➕</span>
+                        <span>Add New Name</span>
+                    </a>
+                    <a href="tasks.html" class="action-btn">
+                        <span class="action-icon">🎲</span>
+                        <span>Generate Tasks</span>
+                    </a>
+                    <button onclick="refreshDashboard()" class="action-btn">
+                        <span class="action-icon">🔄</span>
+                        <span>Refresh Data</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📅 System Information</h2>
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Current Date:</span>
+                        <span class="info-value" id="currentDate">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Latest Session:</span>
+                        <span class="info-value" id="latestSession">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Normal Tasks:</span>
+                        <span class="info-value" id="normalTasks">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">App Version:</span>
+                        <span class="info-value">1.0.0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tasks - Name Rotation System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .task-table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .task-table th:first-child {
+            border-radius: 8px 0 0 0;
+            width: 100px;
+        }
+        
+        .task-table th:nth-child(2) {
+            width: 250px;
+        }
+        
+        .task-table th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+        
+        .task-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .task-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .task-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .day-cell {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+        
+        .name-cell {
+            color: var(--dark-color);
+        }
+        
+        .name-item {
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .task-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+        
+        .empty-table {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .task-card:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .task-card.special {
+            border-left-color: var(--warning-color);
+            background: linear-gradient(to right, #fff9e6 0%, white 20%);
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .task-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .task-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .task-badge.normal {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .task-badge.special {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .task-description {
+            color: #6c757d;
+            font-size: 0.95em;
+            margin-top: 8px;
+        }
+        
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .tasks-section {
+            margin-top: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .empty-tasks {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--light-color);
+            border-radius: 10px;
+            color: #6c757d;
+        }
+        
+        .empty-tasks-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* New Features Styles for User */
+        .user-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .feature-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .feature-section h3 {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .announcement-item, .desire-item {
+            background: var(--light-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--info-color);
+        }
+
+        .announcement-item.all-users {
+            border-left-color: var(--primary-color);
+            background: #e3f2fd;
+        }
+
+        .announcement-item.specific-user {
+            border-left-color: var(--success-color);
+            background: #d4edda;
+        }
+
+        .desires-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .monthly-desire-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .monthly-desire-display h2 {
+            color: white;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .monthly-desire-content {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .monthly-desire-date {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        /* Enhanced Logout Button */
+        .logout-btn-top {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+        
+        .logout-btn-top:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .desires-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .user-features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+            }
+            
+            .logout-btn-top {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>🎯 Task Rotation System</h2>
+            </div>
+            <div class="nav-menu">
+                <span class="nav-user" id="currentUser">User</span>
+                <button onclick="handleLogout()" class="logout-btn-top">🚪 Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h1>📋 My Task Overview</h1>
+            <p><b>This week activity:</b> View all assigned tasks and system updates</p>
+        </div>
+
+        <!-- Monthly Desire Display -->
+        <div id="monthlyDesireContainer">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- User Features Grid -->
+        <div class="user-features-grid">
+            <!-- Announcements Section -->
+            <div class="feature-section">
+                <h3>📢 My Announcements</h3>
+                <div id="userAnnouncementsContainer">
+                    <div class="empty-tasks" style="padding: 20px;">
+                        <p>Loading announcements...</p>
+                    </div>
+                </div>
+                <button onclick="refreshAnnouncements()" class="btn btn-secondary btn-block btn-sm" style="margin-top: 15px;">
+                    🔄 Refresh
+                </button>
+            </div>
+
+            <!-- Submit Ideas Section -->
+            <div class="feature-section">
+                <h3>💡 Submit Idea</h3>
+                <form id="ideaForm" onsubmit="handleSubmitIdea(event)">
+                    <div class="form-group">
+                        <label for="ideaTitle">Title</label>
+                        <input type="text" id="ideaTitle" placeholder="Enter idea title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ideaContent">Your Idea</label>
+                        <textarea id="ideaContent" rows="4" placeholder="Describe your idea..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block">
+                        💡 Submit Idea
+                    </button>
+                </form>
+                <div id="myIdeasContainer" style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 10px;">My Submitted Ideas</h4>
+                    <div id="userIdeasList">
+                        <div class="empty-tasks" style="padding: 20px;">
+                            <p>Loading your ideas...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desires Display Section -->
+            <div class="feature-section">
+                <h3>🎯 System Desires</h3>
+                <div class="desires-container">
+                    <div>
+                        <h4 style="margin-bottom: 10px; color: var(--primary-color);">⏳ Short-term</h4>
+                        <div id="userShortTermDesires">
+                            <div class="empty-tasks" style="padding: 10px;">
+                                <p>Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 10px; color: var(--secondary-color);">🎯 Long-term</h4>
+                        <div id="userLongTermDesires">
+                            <div class="empty-tasks" style="padding: 10px;">
+                                <p>Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Display -->
+        <div class="tasks-section">
+            <!-- Normal Tasks Table (Same as Admin View) -->
+            <div class="card">
+                <div class="card-header section-header">
+                    <h2>📝 People who will share words of God!</h2>
+                    <button onclick="loadAllData()" class="btn btn-secondary btn-sm">🔄 Refresh All</button>
+                </div>
+                <div class="card-body">
+                    <div id="normalTasksContainer">
+                        <div class="empty-tasks">
+                            <div class="empty-tasks-icon">⏳</div>
+                            <p>Loading tasks...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Special Tasks -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>⭐ People who will do Sunday Intercession</h2>
+                </div>
+                <div class="card-body">
+                    <div id="specialTasksContainer">
+                        <div class="empty-tasks">
+                            <div class="empty-tasks-icon">⏳</div>
+                            <p>Loading tasks...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/user-features.js"></script>
+    <script>
+        // Load all data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+            recordUserVisit();
+        });
+
+        // Record user visit
+        async function recordUserVisit() {
+            try {
+                await fetch(`${API_BASE}/user-activity/record-visit`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (error) {
+                console.error('Failed to record visit:', error);
+            }
+        }
+
+        // Load all data
+        async function loadAllData() {
+            await Promise.all([
+                loadUserFeaturesData(),
+                loadNormalTasks(),
+                loadSpecialTasks()
+            ]);
+        }
+
+        // Task functions (same as admin but read-only)
+        async function loadNormalTasks() {
+            try {
+                const response = await fetch(`${API_BASE}/tasks/normal`, { credentials: 'include' });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    displayNormalTasks(result.data);
+                } else {
+                    showToast('Failed to load normal tasks', 'error');
+                }
+            } catch (error) {
+                console.error('Load normal tasks error:', error);
+                showToast('Error loading normal tasks', 'error');
+            }
+        }
+
+        async function loadSpecialTasks() {
+            try {
+                const response = await fetch(`${API_BASE}/tasks/special`, { credentials: 'include' });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    displaySpecialTasks(result.data);
+                } else {
+                    showToast('Failed to load special tasks', 'error');
+                }
+            } catch (error) {
+                console.error('Load special tasks error:', error);
+                showToast('Error loading special tasks', 'error');
+            }
+        }
+
+        // Display normal tasks in table format (same as admin)
+        function displayNormalTasks(tasks) {
+            const container = document.getElementById('normalTasksContainer');
+            
+            if (!tasks || tasks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-tasks">
+                        <div class="empty-tasks-icon">📝</div>
+                        <h3>No tasks generated yet</h3>
+                        <p>Tasks will appear here when admin generates them</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Create table (same as admin view but read-only)
+            let tableHTML = `
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Name</th>
+                            <th>Task</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            // Group tasks by pairs (2 names per day for 5 days)
+            const totalDays = 5;
+            const namesPerDay = 2;
+            
+            for (let day = 1; day <= totalDays; day++) {
+                const startIndex = (day - 1) * namesPerDay;
+                const endIndex = startIndex + namesPerDay;
+                const dayTasks = tasks.slice(startIndex, endIndex);
+                
+                if (dayTasks.length > 0) {
+                    tableHTML += `
+                        <tr>                              
+                            <td class="day-cell">Day ${day}</td>
+                            <td class="name-cell">
+                                ${dayTasks.map(task => `<div class="name-item">👤 ${task.name}</div>`).join('')}
+                            </td>
+                            <td>
+                                <div style="color: var(--dark-color); margin-bottom: 8px; font-weight: 500;">
+                                Morning and Evening:
+                                </div>
+                                <div style="padding: 8px 12px; color: #856404; background: #fff3cd; border-radius: 5px; border: 1px solid #ffc107;">
+                                    ${dayTasks[0].taskName || 'You will share words of God!'}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+
+        // Display special tasks
+        function displaySpecialTasks(tasks) {
+            const container = document.getElementById('specialTasksContainer');
+            
+            if (!tasks || tasks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-tasks">
+                        <div class="empty-tasks-icon">⭐</div>
+                        <h3>No special tasks yet</h3>
+                        <p>Special tasks will appear here after generation</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const tasksHTML = `
+                <div class="tasks-grid">
+                    ${tasks.map((task, index) => `
+                        <div class="task-card special">
+                            <div class="task-header">
+                                <div class="task-name">${index + 1}. ${task.name}</div>
+                                <span class="task-badge special">⭐ Special</span>
+                            </div>
+                            <div class="task-description">
+                                Saturday and Sunday intercession
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            container.innerHTML = tasksHTML;
+        }
+    </script>
+</body>
+</html>
