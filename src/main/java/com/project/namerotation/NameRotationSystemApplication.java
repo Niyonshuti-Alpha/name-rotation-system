@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @SpringBootApplication
 
-
 @EntityScan("com.project.namerotationsystem.model")
 public class NameRotationSystemApplication {
     public static void main(String[] args) {
