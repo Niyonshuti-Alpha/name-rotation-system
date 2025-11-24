@@ -1,0 +1,21 @@
+
+services:
+
+  - type: web
+
+    name: name-rotation-system
+
+    env: java
+
+    plan: free
+
+    buildCommand: mvn clean compile -DskipTests
+
+    startCommand: java -jar target/*.jar
+
+    envVars:
+
+      - key: JAVA_VERSION
+
+        value: 17
+
