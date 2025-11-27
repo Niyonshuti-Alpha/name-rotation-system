@@ -1,5 +1,5 @@
 // API Base URL
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = '/api';
 
 // Check if user is authenticated
 async function checkAuth() {
